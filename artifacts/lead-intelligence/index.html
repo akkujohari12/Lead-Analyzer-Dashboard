@@ -683,7 +683,7 @@
 
       // Score animation
       document.getElementById("progressFill").style.width = result.score + "%";
-      document.getElementById("scoreText").innerText = result.score + "/100";
+      animateScore(result.score);
 
       // Segment badge
       const badge = document.getElementById("segmentBadge");
