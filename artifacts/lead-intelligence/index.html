@@ -558,38 +558,38 @@
       <div class="form-grid">
 
         <div class="form-group" id="grp-name">
-          <label for="inp-name">Full Name</label>
-          <input type="text" id="inp-name" placeholder="e.g. Sarah Chen" autocomplete="off" />
+          <label for="name">Full Name</label>
+          <input type="text" id="name" placeholder="e.g. Sarah Chen" autocomplete="off" />
           <span class="error-msg">Name is required</span>
         </div>
 
         <div class="form-group" id="grp-role">
-          <label for="inp-role">Role / Title</label>
-          <input type="text" id="inp-role" placeholder="e.g. VP of Engineering" autocomplete="off" />
+          <label for="role">Role / Title</label>
+          <input type="text" id="role" placeholder="e.g. VP of Engineering" autocomplete="off" />
           <span class="error-msg">Role is required</span>
         </div>
 
         <div class="form-group" id="grp-company">
-          <label for="inp-company">Company</label>
-          <input type="text" id="inp-company" placeholder="e.g. NovaTech" autocomplete="off" />
+          <label for="company">Company</label>
+          <input type="text" id="company" placeholder="e.g. NovaTech" autocomplete="off" />
           <span class="error-msg">Company is required</span>
         </div>
 
         <div class="form-group" id="grp-size">
-          <label for="inp-size">Company Size</label>
-          <select id="inp-size">
+          <label for="companySize">Company Size</label>
+          <select id="companySize">
             <option value="" disabled selected>Select size</option>
-            <option value="startup">Startup (1–50)</option>
-            <option value="smb">SMB (51–200)</option>
-            <option value="mid-market">Mid-Market (201–1,000)</option>
-            <option value="enterprise">Enterprise (1,000+)</option>
+            <option value="50">Startup (1–50)</option>
+            <option value="200">SMB (51–200)</option>
+            <option value="1000">Mid-Market (201–1,000)</option>
+            <option value="5000">Enterprise (1,000+)</option>
           </select>
           <span class="error-msg">Please select a size</span>
         </div>
 
         <div class="form-group full" id="grp-notes">
-          <label for="inp-notes">Notes <span style="opacity:0.45;font-weight:400">(optional)</span></label>
-          <textarea id="inp-notes" placeholder="e.g. Mentioned they're evaluating tools urgently, decision maker, budget approved..."></textarea>
+          <label for="notes">Notes <span style="opacity:0.45;font-weight:400">(optional)</span></label>
+          <textarea id="notes" placeholder="e.g. Mentioned they're evaluating tools urgently, decision maker, budget approved..."></textarea>
         </div>
 
       </div>
@@ -628,101 +628,10 @@
   </div>
 
   <script>
-    // ── Scoring ──────────────────────────────────────────────────────
-    function analyzeLead({ name, role, company, size, notes }) {
-      let score = 20;
-      const r = role.toLowerCase();
-      const n = (notes || '').toLowerCase();
-
-      const senior = ['ceo','cto','coo','cfo','vp','director','head','chief','founder','president','owner'];
-      const mid    = ['manager','lead','senior','principal','architect','engineer','developer','designer'];
-      const junior = ['intern','junior','trainee','assistant','coordinator','associate'];
-
-      if      (senior.some(w => r.includes(w))) score += 30;
-      else if (mid.some(w => r.includes(w)))    score += 15;
-      else if (junior.some(w => r.includes(w))) score -= 5;
-
-      if      (size === 'enterprise')  score += 25;
-      else if (size === 'mid-market')  score += 15;
-      else if (size === 'smb')         score += 8;
-      else if (size === 'startup')     score += 3;
-
-      const high = ['urgent','asap','immediately','budget approved','decision maker',
-                    'evaluating','contract','pilot','demo','ready','purchase','buy','decision'];
-      const med  = ['exploring','looking','considering','planning','researching','potential','interested'];
-      const low  = ['not now','later','no budget','pause','hold','just curious','curious'];
-
-      high.forEach(w => { if (n.includes(w)) score += 10; });
-      med.forEach(w  => { if (n.includes(w)) score += 4; });
-      low.forEach(w  => { if (n.includes(w)) score -= 12; });
-
-      score = Math.min(100, Math.max(5, Math.round(score)));
-
-      const segment = score >= 72 ? 'HOT' : score >= 42 ? 'WARM' : 'COLD';
-      const first   = name.trim().split(' ')[0];
-
-      const msgs = {
-        HOT: [
-          `Hi ${first}, I noticed ${company} is at a stage where our platform could make an immediate impact. I'd love to set up a 20-minute call this week — does Thursday work?`,
-          `${first}, given your role at ${company} and what you've shared, I think we can solve your core challenge fast. Can we schedule a quick discovery call?`,
-        ],
-        WARM: [
-          `Hi ${first}, teams like yours at ${company} often find our solution cuts through the complexity you're navigating. I'd love to share a short case study — open to a quick chat?`,
-          `${first}, I think there's a genuine fit between what ${company} is working toward and what we offer. Would a 15-minute intro call be worthwhile?`,
-        ],
-        COLD: [
-          `Hi ${first}, I came across ${company} and thought you might find this relevant down the road. Sending over a quick overview — no pressure, just something to keep in mind.`,
-          `${first}, happy to share how teams similar to ${company} are approaching this. No strings attached — just a resource that might be useful when the timing is right.`,
-        ],
-      };
-
-      const actions = {
-        HOT: [
-          'Book a product demo within 48 hours. Prepare an ROI case study tailored to their vertical and company size.',
-          'Fast-track to discovery call. Loop in your account executive for closing support.',
-        ],
-        WARM: [
-          'Send a tailored case study or industry report. Follow up in 5–7 days with a light-touch check-in.',
-          'Add to nurture sequence. Schedule a soft follow-up next week to gauge readiness.',
-        ],
-        COLD: [
-          'Enroll in a drip email campaign. Revisit in 30 days with fresh context or a relevant industry insight.',
-          'Monitor activity signals. Tag for future re-engagement when company stage or budget conditions change.',
-        ],
-      };
-
-      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
-
-      return { score, segment, outreach: pick(msgs[segment]), action: pick(actions[segment]) };
-    }
-
-    // ── Helpers ──────────────────────────────────────────────────────
-    function progressGradient(seg) {
-      if (seg === 'HOT')  return 'linear-gradient(90deg, #ef4444, #f97316)';
-      if (seg === 'WARM') return 'linear-gradient(90deg, #f59e0b, #fbbf24)';
-      return 'linear-gradient(90deg, #10b981, #34d399)';
-    }
-
-    const segConfig = {
-      HOT:  { cls: 'hot',  label: '🔥 HOT',  desc: 'High priority — engage now before they go cold.' },
-      WARM: { cls: 'warm', label: '🌤 WARM', desc: 'Strong potential — nurture and follow up soon.' },
-      COLD: { cls: 'cold', label: '❄️ COLD', desc: 'Long-term pipeline — keep warm over time.' },
-    };
-
-    function animateCounter(el, target, duration = 950) {
-      const start = performance.now();
-      (function step(ts) {
-        const p    = Math.min((ts - start) / duration, 1);
-        const ease = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(ease * target);
-        if (p < 1) requestAnimationFrame(step);
-      })(performance.now());
-    }
-
     // ── Validation ───────────────────────────────────────────────────
     function validate() {
       let ok = true;
-      [['grp-name','inp-name'],['grp-role','inp-role'],['grp-company','inp-company'],['grp-size','inp-size']]
+      [['grp-name','name'],['grp-role','role'],['grp-company','company'],['grp-size','companySize']]
         .forEach(([gId, iId]) => {
           const grp = document.getElementById(gId);
           grp.classList.toggle('has-error', !document.getElementById(iId).value.trim());
@@ -731,8 +640,43 @@
       return ok;
     }
 
-    // ── Submit ───────────────────────────────────────────────────────
-    document.getElementById('leadForm').addEventListener('submit', e => {
+    // ── script.js ────────────────────────────────────────────────────
+    async function submitLead() {
+      const data = {
+        name:        document.getElementById("name").value,
+        role:        document.getElementById("role").value,
+        company:     document.getElementById("company").value,
+        companySize: parseInt(document.getElementById("companySize").value),
+        notes:       document.getElementById("notes").value
+      };
+
+      const res = await fetch("/api/analyze-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      // Show card
+      document.getElementById("resultCard").classList.remove("hidden");
+
+      // Score animation
+      document.getElementById("progressFill").style.width = result.score + "%";
+      document.getElementById("scoreText").innerText = result.score + "/100";
+
+      // Segment badge
+      const badge = document.getElementById("segmentBadge");
+      badge.innerText = result.segment;
+      badge.className = "badge " + result.segment.toLowerCase();
+
+      // Message + action
+      document.getElementById("message").innerText = result.message;
+      document.getElementById("action").innerText = result.action;
+    }
+
+    // ── Wire form submit to submitLead ───────────────────────────────
+    document.getElementById('leadForm').addEventListener('submit', async e => {
       e.preventDefault();
       if (!validate()) return;
 
@@ -744,53 +688,21 @@
       spinner.style.display = 'block';
       btnText.textContent   = 'Analyzing…';
 
-      const data = {
-        name:    document.getElementById('inp-name').value.trim(),
-        role:    document.getElementById('inp-role').value.trim(),
-        company: document.getElementById('inp-company').value.trim(),
-        size:    document.getElementById('inp-size').value,
-        notes:   document.getElementById('inp-notes').value.trim(),
-      };
-
-      setTimeout(() => {
-        const result = analyzeLead(data);
-        const seg    = segConfig[result.segment];
-
-        // ── Populate #scoreText + #progressFill
-        const scoreEl = document.getElementById('scoreText');
-        animateCounter(scoreEl, result.score);
-
-        const fill = document.getElementById('progressFill');
-        fill.style.background = progressGradient(result.segment);
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          fill.style.width = result.score + '%';
-        }));
-
-        // ── Populate #segmentBadge
-        const badge  = document.getElementById('segmentBadge');
-        badge.className    = 'badge ' + seg.cls;
-        badge.textContent  = seg.label;
-
-        // ── Populate #message
-        document.getElementById('message').textContent = '"' + result.outreach + '"';
-
-        // ── Populate #action
-        document.getElementById('action').textContent = result.action;
-
-        // ── Reveal #resultCard (remove .hidden)
-        const card = document.getElementById('resultCard');
-        card.classList.remove('hidden');
-        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        // ── Reset button
+      try {
+        await submitLead();
+        document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        console.error('Analysis failed:', err);
+        btnText.textContent = '⚠ Error — try again';
+      } finally {
         btn.disabled          = false;
         spinner.style.display = 'none';
-        btnText.textContent   = '⚡ Analyze Lead';
-      }, 850);
+        if (btnText.textContent === 'Analyzing…') btnText.textContent = '⚡ Analyze Lead';
+      }
     });
 
     // Clear errors on input
-    ['inp-name','inp-role','inp-company','inp-size'].forEach(id => {
+    ['name','role','company','companySize'].forEach(id => {
       const el = document.getElementById(id);
       el.addEventListener('input',  () => el.closest('.form-group').classList.remove('has-error'));
       el.addEventListener('change', () => el.closest('.form-group').classList.remove('has-error'));
