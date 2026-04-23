@@ -4,6 +4,15 @@ import { openai } from "../lib/openai";
 
 const router = Router();
 
+function getAction(segment: string): string {
+  const actions: Record<string, string> = {
+    HOT:  "Book a product demo within 48 hours. Prepare a tailored ROI case study.",
+    WARM: "Send a case study and follow up in 5–7 days with a light-touch check-in.",
+    COLD: "Enroll in a drip email campaign. Revisit in 30 days with fresh context.",
+  };
+  return actions[segment] ?? "";
+}
+
 router.post("/analyze-lead", async (req, res) => {
   const { name, role, company, companySize, notes } = req.body as {
     name: string;
@@ -43,13 +52,7 @@ router.post("/analyze-lead", async (req, res) => {
   score = Math.min(100, Math.max(5, Math.round(score)));
   const segment = score >= 72 ? "HOT" : score >= 42 ? "WARM" : "COLD";
 
-  // ── Template-based next actions ───────────────────────────────────
-  const templateActions: Record<string, string> = {
-    HOT:  "Book a product demo within 48 hours. Prepare a tailored ROI case study.",
-    WARM: "Send a case study and follow up in 5–7 days with a light-touch check-in.",
-    COLD: "Enroll in a drip email campaign. Revisit in 30 days with fresh context.",
-  };
-  const action = templateActions[segment];
+  const action = getAction(segment);
 
   // ── AI-generated outreach message ─────────────────────────────────
   let message: string;
