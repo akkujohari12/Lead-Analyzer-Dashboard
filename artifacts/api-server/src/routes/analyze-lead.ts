@@ -1,13 +1,10 @@
 import { Router } from "express";
 import { db } from "../lib/db";
+import { openai } from "../lib/openai";
 
 const router = Router();
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-router.post("/analyze-lead", (req, res) => {
+router.post("/analyze-lead", async (req, res) => {
   const { name, role, company, companySize, notes } = req.body as {
     name: string;
     role: string;
@@ -16,6 +13,7 @@ router.post("/analyze-lead", (req, res) => {
     notes?: string;
   };
 
+  // ── Rule-based scoring ────────────────────────────────────────────
   let score = 20;
   const r = (role ?? "").toLowerCase();
   const n = (notes ?? "").toLowerCase();
@@ -43,43 +41,60 @@ router.post("/analyze-lead", (req, res) => {
   lowSignals.forEach(w  => { if (n.includes(w)) score -= 12; });
 
   score = Math.min(100, Math.max(5, Math.round(score)));
-
   const segment = score >= 72 ? "HOT" : score >= 42 ? "WARM" : "COLD";
-  const first   = (name ?? "there").trim().split(" ")[0];
 
-  const messages: Record<string, string[]> = {
-    HOT: [
-      `Hi ${first}, I noticed ${company} is at a stage where our platform could make an immediate impact. I'd love to set up a 20-minute call this week — does Thursday work?`,
-      `${first}, given your role at ${company} and what you've shared, I think we can solve your core challenge fast. Can we schedule a quick discovery call?`,
-    ],
-    WARM: [
-      `Hi ${first}, teams like yours at ${company} often find our solution cuts through the complexity you're navigating. I'd love to share a short case study — open to a quick chat?`,
-      `${first}, I think there's a genuine fit between what ${company} is working toward and what we offer. Would a 15-minute intro call be worthwhile?`,
-    ],
-    COLD: [
-      `Hi ${first}, I came across ${company} and thought you might find this relevant down the road. Sending over a quick overview — no pressure, just something to keep in mind.`,
-      `${first}, happy to share how teams similar to ${company} are approaching this. No strings attached — just a resource that might be useful when the timing is right.`,
-    ],
-  };
+  // ── AI-generated outreach message + next action ───────────────────
+  let message: string;
+  let action: string;
 
-  const actions: Record<string, string[]> = {
-    HOT: [
-      "Book a product demo within 48 hours. Prepare an ROI case study tailored to their vertical and company size.",
-      "Fast-track to discovery call. Loop in your account executive for closing support.",
-    ],
-    WARM: [
-      "Send a tailored case study or industry report. Follow up in 5–7 days with a light-touch check-in.",
-      "Add to nurture sequence. Schedule a soft follow-up next week to gauge readiness.",
-    ],
-    COLD: [
-      "Enroll in a drip email campaign. Revisit in 30 days with fresh context or a relevant industry insight.",
-      "Monitor activity signals. Tag for future re-engagement when company stage or budget conditions change.",
-    ],
-  };
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      max_tokens: 300,
+      response_format: { type: "json_object" },
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a sales intelligence assistant. Given a lead's details and their segment, write two things:\n" +
+            "1. A short, personalized outreach message (2-3 sentences, conversational, no fluff).\n" +
+            "2. A concrete next action the sales rep should take (1-2 sentences).\n" +
+            "Respond in this exact JSON format: { \"message\": \"...\", \"action\": \"...\" }",
+        },
+        {
+          role: "user",
+          content:
+            `Name: ${name}\nRole: ${role}\nCompany: ${company}\nCompany size: ${companySize} employees\n` +
+            `Notes: ${notes || "None"}\nScore: ${score}/100\nSegment: ${segment}`,
+        },
+      ],
+    });
 
-  const message = pick(messages[segment]);
-  const action  = pick(actions[segment]);
+    let raw = completion.choices[0]?.message?.content ?? "";
+    // Strip markdown code fences if the model wrapped the JSON
+    raw = raw.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
+    if (!raw) throw new Error("Empty response from OpenAI");
+    const parsed = JSON.parse(raw);
+    message = parsed.message ?? "";
+    action  = parsed.action  ?? "";
+  } catch (err) {
+    console.error("OpenAI error, falling back to templates:", err);
+    const first = (name ?? "there").trim().split(" ")[0];
+    const fallbackMessages: Record<string, string> = {
+      HOT:  `Hi ${first}, given your role at ${company} and the urgency you've described, I'd love to schedule a quick call this week. Would Thursday work?`,
+      WARM: `Hi ${first}, teams like yours at ${company} often find our solution a strong fit. I'd love to share a short case study — open to a quick chat?`,
+      COLD: `Hi ${first}, I came across ${company} and thought you might find this relevant down the road. No pressure, just something to keep in mind.`,
+    };
+    const fallbackActions: Record<string, string> = {
+      HOT:  "Book a product demo within 48 hours. Prepare a tailored ROI case study.",
+      WARM: "Send a case study and follow up in 5–7 days with a light-touch check-in.",
+      COLD: "Enroll in a drip email campaign. Revisit in 30 days with fresh context.",
+    };
+    message = fallbackMessages[segment];
+    action  = fallbackActions[segment];
+  }
 
+  // ── Persist to database ───────────────────────────────────────────
   db.run(
     `INSERT INTO leads (name, role, company, company_size, notes, score, segment, message, action)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
