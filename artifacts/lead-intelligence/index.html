@@ -694,6 +694,17 @@
       badge.innerText = result.segment;
       badge.className = "badge " + result.segment.toLowerCase();
 
+      // Reason text
+      let reason = "";
+      if (result.score > 70) {
+        reason = "High-value role and strong buying signals detected.";
+      } else if (result.score >= 40) {
+        reason = "Moderate potential with some positive indicators.";
+      } else {
+        reason = "Low urgency or limited qualification signals.";
+      }
+      document.getElementById("reasonText").innerText = reason;
+
       // Message + action
       document.getElementById("message").innerText = result.message;
       document.getElementById("action").innerText = result.action;
