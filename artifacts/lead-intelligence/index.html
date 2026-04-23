@@ -642,7 +642,12 @@
     }
 
     // ── script.js ────────────────────────────────────────────────────
+    const button = document.querySelector("button");
+
     async function submitLead() {
+      button.innerText = "Analyzing...";
+      button.disabled = true;
+
       const data = {
         name:        document.getElementById("name").value,
         role:        document.getElementById("role").value,
@@ -658,6 +663,10 @@
       });
 
       const result = await res.json();
+
+      // Restore button
+      button.innerText = "⚡ Analyze Lead";
+      button.disabled = false;
 
       // Show card
       document.getElementById("resultCard").classList.remove("hidden");
@@ -681,24 +690,13 @@
       e.preventDefault();
       if (!validate()) return;
 
-      const btn     = document.getElementById('btn-submit');
-      const spinner = document.getElementById('spinner');
-      const btnText = document.getElementById('btn-text');
-
-      btn.disabled          = true;
-      spinner.style.display = 'block';
-      btnText.textContent   = 'Analyzing…';
-
       try {
         await submitLead();
         document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (err) {
         console.error('Analysis failed:', err);
-        btnText.textContent = '⚠ Error — try again';
-      } finally {
-        btn.disabled          = false;
-        spinner.style.display = 'none';
-        if (btnText.textContent === 'Analyzing…') btnText.textContent = '⚡ Analyze Lead';
+        button.innerText = '⚠ Error — try again';
+        button.disabled = false;
       }
     });
 
