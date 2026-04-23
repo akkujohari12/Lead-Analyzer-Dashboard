@@ -43,9 +43,16 @@ router.post("/analyze-lead", async (req, res) => {
   score = Math.min(100, Math.max(5, Math.round(score)));
   const segment = score >= 72 ? "HOT" : score >= 42 ? "WARM" : "COLD";
 
-  // ── AI-generated outreach message + next action ───────────────────
+  // ── Template-based next actions ───────────────────────────────────
+  const templateActions: Record<string, string> = {
+    HOT:  "Book a product demo within 48 hours. Prepare a tailored ROI case study.",
+    WARM: "Send a case study and follow up in 5–7 days with a light-touch check-in.",
+    COLD: "Enroll in a drip email campaign. Revisit in 30 days with fresh context.",
+  };
+  const action = templateActions[segment];
+
+  // ── AI-generated outreach message ─────────────────────────────────
   let message: string;
-  let action: string;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -56,10 +63,11 @@ router.post("/analyze-lead", async (req, res) => {
         {
           role: "system",
           content:
-            "You are a sales intelligence assistant. Given a lead's details and their segment, write two things:\n" +
-            "1. A short, personalized outreach message (2-3 sentences, conversational, no fluff).\n" +
-            "2. A concrete next action the sales rep should take (1-2 sentences).\n" +
-            "Respond in this exact JSON format: { \"message\": \"...\", \"action\": \"...\" }",
+            "You are a sales intelligence assistant.\n\n" +
+            "Given a lead's details and their segment, write a short, personalized outreach message " +
+            "(2–3 sentences, conversational and professional, no fluff).\n\n" +
+            "Do NOT include next actions.\n\n" +
+            "Respond in this exact JSON format:\n{ \"message\": \"...\" }",
         },
         {
           role: "user",
@@ -71,27 +79,19 @@ router.post("/analyze-lead", async (req, res) => {
     });
 
     let raw = completion.choices[0]?.message?.content ?? "";
-    // Strip markdown code fences if the model wrapped the JSON
     raw = raw.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
     if (!raw) throw new Error("Empty response from OpenAI");
     const parsed = JSON.parse(raw);
     message = parsed.message ?? "";
-    action  = parsed.action  ?? "";
   } catch (err) {
-    console.error("OpenAI error, falling back to templates:", err);
+    console.error("OpenAI error, falling back to template:", err);
     const first = (name ?? "there").trim().split(" ")[0];
     const fallbackMessages: Record<string, string> = {
       HOT:  `Hi ${first}, given your role at ${company} and the urgency you've described, I'd love to schedule a quick call this week. Would Thursday work?`,
       WARM: `Hi ${first}, teams like yours at ${company} often find our solution a strong fit. I'd love to share a short case study — open to a quick chat?`,
       COLD: `Hi ${first}, I came across ${company} and thought you might find this relevant down the road. No pressure, just something to keep in mind.`,
     };
-    const fallbackActions: Record<string, string> = {
-      HOT:  "Book a product demo within 48 hours. Prepare a tailored ROI case study.",
-      WARM: "Send a case study and follow up in 5–7 days with a light-touch check-in.",
-      COLD: "Enroll in a drip email campaign. Revisit in 30 days with fresh context.",
-    };
     message = fallbackMessages[segment];
-    action  = fallbackActions[segment];
   }
 
   // ── Persist to database ───────────────────────────────────────────
