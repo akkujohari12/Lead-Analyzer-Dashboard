@@ -76,7 +76,7 @@ router.post("/analyze-lead", async (req, res) => {
           role: "user",
           content:
             `Name: ${name}\nRole: ${role}\nCompany: ${company}\nCompany size: ${companySize} employees\n` +
-            `Notes: ${notes || "None"}\nScore: ${score}/100\nSegment: ${segment}`,
+            `Notes: ${notes || "None"}\nSegment: ${segment}`,
         },
       ],
     });
