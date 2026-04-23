@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Lead Intelligence Tool"
+version = "1.0.0"
+id = "artifacts/lead-intelligence"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 26110
+
+[services.development]
+run = "pnpm --filter @workspace/lead-intelligence run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/lead-intelligence", "run", "build" ]
+publicDir = "artifacts/lead-intelligence/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "26110"
+BASE_PATH = "/"

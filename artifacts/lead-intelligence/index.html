@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lead Intelligence Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --radius: 14px;
+      --transition: 0.3s ease;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a3e 30%, #24243e 60%, #0f3460 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 16px 80px;
+      color: #e2e8f0;
+    }
+
+    /* Animated background orbs */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(16,185,129,0.10) 0%, transparent 70%);
+      pointer-events: none;
+      animation: drift 15s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* ─── Header ─── */
+    .header {
+      text-align: center;
+      margin-bottom: 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      background: rgba(99,102,241,0.18);
+      border: 1px solid rgba(99,102,241,0.35);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: clamp(26px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 50%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: rgba(226,232,240,0.60);
+      max-width: 440px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ─── Glass container ─── */
+    .glass-card {
+      width: 100%;
+      max-width: 620px;
+      background: rgba(255,255,255,0.055);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 22px;
+      padding: 36px 38px;
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.35),
+        0 1px 0 rgba(255,255,255,0.06) inset,
+        0 -1px 0 rgba(0,0,0,0.2) inset;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.7);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* ─── Form ─── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-group {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(226,232,240,0.55);
+      letter-spacing: 0.03em;
+    }
+
+    input, select, textarea {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 11px;
+      padding: 11px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #e2e8f0;
+      outline: none;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+      width: 100%;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(226,232,240,0.25);
+    }
+
+    select {
+      appearance: none;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a5b4fc' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    select option {
+      background: #1e1b4b;
+      color: #e2e8f0;
+    }
+
+    textarea { resize: none; height: 90px; line-height: 1.6; }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(99,102,241,0.6);
+      background: rgba(99,102,241,0.08);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    }
+
+    .error-msg {
+      font-size: 11px;
+      color: #f87171;
+      margin-top: 2px;
+      display: none;
+    }
+
+    .form-group.has-error input,
+    .form-group.has-error select,
+    .form-group.has-error textarea {
+      border-color: rgba(248,113,113,0.5);
+    }
+
+    .form-group.has-error .error-msg { display: block; }
+
+    /* ─── Submit Button ─── */
+    .btn-analyze {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4), 0 1px 0 rgba(255,255,255,0.15) inset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-analyze::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+
+    .btn-analyze:hover {
+      transform: scale(1.025);
+      box-shadow: 0 8px 30px rgba(99,102,241,0.55), 0 1px 0 rgba(255,255,255,0.2) inset;
+    }
+
+    .btn-analyze:hover::before { opacity: 1; }
+
+    .btn-analyze:active { transform: scale(0.98); }
+
+    .btn-analyze:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      display: none;
+      animation: spin 0.75s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Output Card ─── */
+    .output-card {
+      width: 100%;
+      max-width: 620px;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .output-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Result sub-cards */
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.055);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 18px;
+      padding: 22px 22px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .result-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    }
+
+    .result-card.full { grid-column: 1 / -1; }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.65);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: rgba(99,102,241,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    /* ─── Score ─── */
+    .score-display {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .score-number {
+      font-size: 44px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      background: linear-gradient(135deg, #e0e7ff, #a5b4fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .score-denom {
+      font-size: 16px;
+      font-weight: 500;
+      color: rgba(226,232,240,0.4);
+      padding-bottom: 6px;
+    }
+
+    .progress-track {
+      height: 8px;
+      width: 100%;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      width: 0%;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Segment badge ─── */
+    .segment-wrap {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: calc(100% - 28px);
+      gap: 10px;
+    }
+
+    .segment-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px 8px 12px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border: 1px solid;
+      width: fit-content;
+      position: relative;
+    }
+
+    .segment-badge::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    .badge-hot {
+      background: rgba(239,68,68,0.12);
+      border-color: rgba(239,68,68,0.35);
+      color: #fca5a5;
+      box-shadow: 0 0 18px rgba(239,68,68,0.18);
+    }
+    .badge-hot::before { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+    .badge-warm {
+      background: rgba(245,158,11,0.12);
+      border-color: rgba(245,158,11,0.35);
+      color: #fcd34d;
+      box-shadow: 0 0 18px rgba(245,158,11,0.18);
+    }
+    .badge-warm::before { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+    .badge-cold {
+      background: rgba(16,185,129,0.12);
+      border-color: rgba(16,185,129,0.35);
+      color: #6ee7b7;
+      box-shadow: 0 0 18px rgba(16,185,129,0.18);
+    }
+    .badge-cold::before { background: #10b981; box-shadow: 0 0 8px #10b981; }
+
+    .segment-desc {
+      font-size: 12px;
+      color: rgba(226,232,240,0.45);
+      line-height: 1.5;
+    }
+
+    /* ─── Outreach / Next Action ─── */
+    .message-box {
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.18);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      color: rgba(226,232,240,0.80);
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    .action-box {
+      background: rgba(16,185,129,0.07);
+      border: 1px solid rgba(16,185,129,0.18);
+      border-left: 3px solid #10b981;
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-size: 13.5px;
+      color: rgba(226,232,240,0.82);
+      line-height: 1.7;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .action-arrow {
+      font-size: 18px;
+      line-height: 1.5;
+      flex-shrink: 0;
+    }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 540px) {
+      .glass-card, .result-card { padding: 24px 20px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .result-grid { grid-template-columns: 1fr; }
+      .score-number { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">⚡ AI-Powered</div>
+    <h1>Lead Intelligence Tool</h1>
+    <p>Score prospects, identify segments, and craft perfect outreach — instantly.</p>
+  </div>
+
+  <!-- Input Form Card -->
+  <div class="glass-card">
+    <div class="section-title">Prospect Details</div>
+    <form id="leadForm" novalidate>
+      <div class="form-grid">
+
+        <div class="form-group" id="grp-name">
+          <label for="inp-name">Full Name</label>
+          <input type="text" id="inp-name" placeholder="e.g. Sarah Chen" autocomplete="off" />
+          <span class="error-msg">Name is required</span>
+        </div>
+
+        <div class="form-group" id="grp-role">
+          <label for="inp-role">Role / Title</label>
+          <input type="text" id="inp-role" placeholder="e.g. VP of Engineering" autocomplete="off" />
+          <span class="error-msg">Role is required</span>
+        </div>
+
+        <div class="form-group" id="grp-company">
+          <label for="inp-company">Company</label>
+          <input type="text" id="inp-company" placeholder="e.g. NovaTech" autocomplete="off" />
+          <span class="error-msg">Company is required</span>
+        </div>
+
+        <div class="form-group" id="grp-size">
+          <label for="inp-size">Company Size</label>
+          <select id="inp-size">
+            <option value="" disabled selected>Select size</option>
+            <option value="startup">Startup (1–50)</option>
+            <option value="smb">SMB (51–200)</option>
+            <option value="mid-market">Mid-Market (201–1,000)</option>
+            <option value="enterprise">Enterprise (1,000+)</option>
+          </select>
+          <span class="error-msg">Please select a size</span>
+        </div>
+
+        <div class="form-group full" id="grp-notes">
+          <label for="inp-notes">Notes <span style="opacity:0.45;font-weight:400">(optional)</span></label>
+          <textarea id="inp-notes" placeholder="e.g. Mentioned they're evaluating tools urgently, decision maker, budget approved..."></textarea>
+        </div>
+
+      </div>
+
+      <button type="submit" class="btn-analyze" id="btn-submit">
+        <div class="spinner" id="spinner"></div>
+        <span id="btn-text">⚡ Analyze Lead</span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Output Card -->
+  <div class="output-card" id="outputCard">
+
+    <div class="result-grid">
+
+      <!-- Score -->
+      <div class="result-card">
+        <div class="card-label"><span class="card-icon">📊</span> Lead Score</div>
+        <div class="score-display">
+          <span class="score-number" id="scoreNumber">0</span>
+          <span class="score-denom">/100</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Segment -->
+      <div class="result-card">
+        <div class="card-label"><span class="card-icon">🎯</span> Segment</div>
+        <div class="segment-wrap">
+          <div class="segment-badge" id="segmentBadge"></div>
+          <p class="segment-desc" id="segmentDesc"></p>
+        </div>
+      </div>
+
+      <!-- Outreach Message -->
+      <div class="result-card full">
+        <div class="card-label"><span class="card-icon">💬</span> Outreach Message</div>
+        <div class="message-box" id="outreachMsg"></div>
+      </div>
+
+      <!-- Next Action -->
+      <div class="result-card full">
+        <div class="card-label"><span class="card-icon">🚀</span> Recommended Next Action</div>
+        <div class="action-box">
+          <span class="action-arrow">→</span>
+          <span id="nextAction"></span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Scoring Logic ────────────────────────────────────────────────
+    function analyzeLead({ name, role, company, size, notes }) {
+      let score = 20;
+      const r = role.toLowerCase();
+      const n = (notes || '').toLowerCase();
+
+      const senior  = ['ceo','cto','coo','cfo','vp','director','head','chief','founder','president','owner'];
+      const mid     = ['manager','lead','senior','principal','architect','engineer','developer','designer'];
+      const junior  = ['intern','junior','trainee','assistant','coordinator','associate'];
+
+      if (senior.some(w => r.includes(w)))      score += 30;
+      else if (mid.some(w => r.includes(w)))    score += 15;
+      else if (junior.some(w => r.includes(w))) score -= 5;
+
+      if      (size === 'enterprise')  score += 25;
+      else if (size === 'mid-market')  score += 15;
+      else if (size === 'smb')         score += 8;
+      else if (size === 'startup')     score += 3;
+
+      const highSignals = ['urgent','asap','immediately','budget approved','decision maker',
+                           'evaluating','contract','pilot','demo','ready','purchase','buy','decision'];
+      const medSignals  = ['exploring','looking','considering','planning','researching','potential','interested'];
+      const lowSignals  = ['not now','later','no budget','pause','hold','just curious','curious'];
+
+      highSignals.forEach(w => { if (n.includes(w)) score += 10; });
+      medSignals.forEach(w  => { if (n.includes(w)) score += 4;  });
+      lowSignals.forEach(w  => { if (n.includes(w)) score -= 12; });
+
+      score = Math.min(100, Math.max(5, Math.round(score)));
+
+      const segment = score >= 72 ? 'HOT' : score >= 42 ? 'WARM' : 'COLD';
+      const first   = name.trim().split(' ')[0];
+
+      const msgs = {
+        HOT: [
+          `Hi ${first}, I noticed ${company} is at a stage where our platform could make an immediate impact. I'd love to set up a 20-minute call this week — does Thursday work?`,
+          `${first}, given your role at ${company} and what you've shared, I think we can solve your core challenge fast. Can we schedule a quick discovery call?`,
+        ],
+        WARM: [
+          `Hi ${first}, teams like yours at ${company} often find our solution cuts through the complexity you're navigating. I'd love to share a short case study — open to a quick chat?`,
+          `${first}, I think there's a genuine fit between what ${company} is working toward and what we offer. Would a 15-minute intro call be worthwhile?`,
+        ],
+        COLD: [
+          `Hi ${first}, I came across ${company} and thought you might find this relevant down the road. Sending over a quick overview — no pressure, just something to keep in mind.`,
+          `${first}, happy to share how teams similar to ${company} are approaching this. No strings attached — just a resource that might be useful when the timing is right.`,
+        ],
+      };
+
+      const actions = {
+        HOT: [
+          'Book a product demo within 48 hours. Prepare an ROI case study tailored to their vertical and company size.',
+          'Fast-track to discovery call. Loop in your account executive for closing support.',
+        ],
+        WARM: [
+          'Send a tailored case study or industry report. Follow up in 5–7 days with a light-touch check-in.',
+          'Add to nurture sequence. Schedule a soft follow-up next week to gauge readiness.',
+        ],
+        COLD: [
+          'Enroll in a drip email campaign. Revisit in 30 days with fresh context or a relevant industry insight.',
+          'Monitor activity signals. Tag for future re-engagement when company stage or budget conditions change.',
+        ],
+      };
+
+      const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+      return {
+        score,
+        segment,
+        outreach: pick(msgs[segment]),
+        action:   pick(actions[segment]),
+      };
+    }
+
+    // ── Progress bar color ───────────────────────────────────────────
+    function progressGradient(segment) {
+      if (segment === 'HOT')  return 'linear-gradient(90deg, #ef4444, #f97316)';
+      if (segment === 'WARM') return 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+      return 'linear-gradient(90deg, #10b981, #34d399)';
+    }
+
+    // ── Segment config ───────────────────────────────────────────────
+    const segConfig = {
+      HOT:  { cls: 'badge-hot',  label: '🔥 HOT',  desc: 'High priority — engage now before they go cold.' },
+      WARM: { cls: 'badge-warm', label: '🌤 WARM', desc: 'Strong potential — nurture and follow up soon.' },
+      COLD: { cls: 'badge-cold', label: '❄️ COLD', desc: 'Long-term pipeline — keep warm over time.' },
+    };
+
+    // ── Animated score counter ───────────────────────────────────────
+    function animateCounter(el, target, duration = 900) {
+      const start = performance.now();
+      const step = ts => {
+        const p = Math.min((ts - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(ease * target);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    // ── Form validation ──────────────────────────────────────────────
+    function validate() {
+      let ok = true;
+      const checks = [
+        ['grp-name', 'inp-name'],
+        ['grp-role', 'inp-role'],
+        ['grp-company', 'inp-company'],
+        ['grp-size', 'inp-size'],
+      ];
+      checks.forEach(([gId, iId]) => {
+        const grp = document.getElementById(gId);
+        const val = document.getElementById(iId).value.trim();
+        if (!val) { grp.classList.add('has-error'); ok = false; }
+        else       { grp.classList.remove('has-error'); }
+      });
+      return ok;
+    }
+
+    // ── Form submit ──────────────────────────────────────────────────
+    document.getElementById('leadForm').addEventListener('submit', e => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const btn     = document.getElementById('btn-submit');
+      const spinner = document.getElementById('spinner');
+      const btnText = document.getElementById('btn-text');
+
+      btn.disabled       = true;
+      spinner.style.display = 'block';
+      btnText.textContent   = 'Analyzing…';
+
+      const data = {
+        name:    document.getElementById('inp-name').value.trim(),
+        role:    document.getElementById('inp-role').value.trim(),
+        company: document.getElementById('inp-company').value.trim(),
+        size:    document.getElementById('inp-size').value,
+        notes:   document.getElementById('inp-notes').value.trim(),
+      };
+
+      setTimeout(() => {
+        const result = analyzeLead(data);
+
+        // Score
+        const scoreEl    = document.getElementById('scoreNumber');
+        const progressEl = document.getElementById('progressFill');
+        animateCounter(scoreEl, result.score, 1000);
+        progressEl.style.background = progressGradient(result.segment);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            progressEl.style.width = result.score + '%';
+          });
+        });
+
+        // Segment
+        const seg     = segConfig[result.segment];
+        const badgeEl = document.getElementById('segmentBadge');
+        badgeEl.className = 'segment-badge ' + seg.cls;
+        badgeEl.textContent = seg.label;
+        document.getElementById('segmentDesc').textContent = seg.desc;
+
+        // Outreach
+        document.getElementById('outreachMsg').textContent = '"' + result.outreach + '"';
+
+        // Next action
+        document.getElementById('nextAction').textContent = result.action;
+
+        // Show output
+        const card = document.getElementById('outputCard');
+        card.classList.add('visible');
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Reset button
+        btn.disabled          = false;
+        spinner.style.display = 'none';
+        btnText.textContent   = '⚡ Analyze Lead';
+      }, 850);
+    });
+
+    // Clear errors on input
+    ['inp-name','inp-role','inp-company','inp-size'].forEach(id => {
+      const el  = document.getElementById(id);
+      const grp = el.closest('.form-group');
+      el.addEventListener('input', () => grp.classList.remove('has-error'));
+      el.addEventListener('change', () => grp.classList.remove('has-error'));
+    });
+  </script>
+</body>
+</html>
