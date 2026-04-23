@@ -4,7 +4,17 @@ async function loadLeads() {
   const res = await fetch("/api/leads");
   const data = await res.json();
   allLeads = data;
+  renderStats(data);
   displayLeads(data);
+}
+
+function renderStats(leads) {
+  const total = leads.length;
+  const hot = leads.filter(l => l.segment === "HOT").length;
+
+  document.getElementById("stats").innerHTML = `
+    <p>Total Leads: ${total} | 🔥 Hot Leads: ${hot}</p>
+  `;
 }
 
 function displayLeads(leads) {
