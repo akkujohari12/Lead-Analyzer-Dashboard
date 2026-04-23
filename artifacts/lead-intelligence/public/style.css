@@ -1,0 +1,32 @@
+.container {
+  max-width: 900px;
+  margin: 50px auto;
+  color: white;
+}
+
+.filters {
+  margin-bottom: 20px;
+}
+
+.filters button {
+  margin-right: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.lead-card {
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(8px);
+}
+
+.lead-card:hover {
+  transform: translateY(-2px);
+  transition: 0.2s ease;
+}
