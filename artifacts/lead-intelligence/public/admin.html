@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <h1>📊 Admin Dashboard</h1>
+
+  <div class="filters">
+    <button onclick="filterLeads('ALL')">All</button>
+    <button onclick="filterLeads('HOT')">HOT</button>
+    <button onclick="filterLeads('WARM')">WARM</button>
+    <button onclick="filterLeads('COLD')">COLD</button>
+  </div>
+
+  <div id="leadsContainer"></div>
+</div>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
