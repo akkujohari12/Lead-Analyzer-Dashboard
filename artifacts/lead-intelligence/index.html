@@ -27,14 +27,11 @@
       color: #e2e8f0;
     }
 
-    /* Animated background orbs */
     body::before {
       content: '';
       position: fixed;
-      top: -20%;
-      left: -10%;
-      width: 60vw;
-      height: 60vw;
+      top: -20%; left: -10%;
+      width: 60vw; height: 60vw;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
       pointer-events: none;
@@ -44,10 +41,8 @@
     body::after {
       content: '';
       position: fixed;
-      bottom: -20%;
-      right: -10%;
-      width: 50vw;
-      height: 50vw;
+      bottom: -20%; right: -10%;
+      width: 50vw; height: 50vw;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(16,185,129,0.10) 0%, transparent 70%);
       pointer-events: none;
@@ -103,7 +98,7 @@
       line-height: 1.6;
     }
 
-    /* ─── Glass container ─── */
+    /* ─── Glass base card ─── */
     .glass-card {
       width: 100%;
       max-width: 620px;
@@ -190,10 +185,7 @@
       padding-right: 36px;
     }
 
-    select option {
-      background: #1e1b4b;
-      color: #e2e8f0;
-    }
+    select option { background: #1e1b4b; color: #e2e8f0; }
 
     textarea { resize: none; height: 90px; line-height: 1.6; }
 
@@ -218,7 +210,7 @@
 
     .form-group.has-error .error-msg { display: block; }
 
-    /* ─── Submit Button ─── */
+    /* ─── Submit button ─── */
     .btn-analyze {
       width: 100%;
       margin-top: 20px;
@@ -257,18 +249,11 @@
     }
 
     .btn-analyze:hover::before { opacity: 1; }
-
     .btn-analyze:active { transform: scale(0.98); }
-
-    .btn-analyze:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-      transform: none;
-    }
+    .btn-analyze:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
 
     .spinner {
-      width: 16px;
-      height: 16px;
+      width: 16px; height: 16px;
       border: 2px solid rgba(255,255,255,0.3);
       border-top-color: #fff;
       border-radius: 50%;
@@ -278,83 +263,90 @@
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ─── Output Card ─── */
-    .output-card {
+    /* ══════════════════════════════════════════
+       RESULT CARD  (matches user's HTML spec)
+    ══════════════════════════════════════════ */
+    .result-card {
       width: 100%;
       max-width: 620px;
-      opacity: 0;
-      transform: translateY(20px);
-      pointer-events: none;
-      transition: opacity 0.5s ease, transform 0.5s ease;
       position: relative;
       z-index: 1;
+
+      /* glassmorphism */
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.11);
+      border-radius: 22px;
+      padding: 32px 36px;
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.35),
+        0 1px 0 rgba(255,255,255,0.06) inset;
     }
 
-    .output-card.visible {
+    /* hidden / visible states */
+    .result-card.hidden {
+      opacity: 0;
+      transform: translateY(22px);
+      pointer-events: none;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+
+    .result-card:not(.hidden) {
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
+      transition: opacity 0.45s ease, transform 0.45s ease;
     }
 
-    /* Result sub-cards */
-    .result-grid {
+    /* heading inside result card */
+    .result-card h3 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(165,180,252,0.7);
+      margin-bottom: 26px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .result-card h3::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* ─── score-section ─── */
+    .score-section {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
+      gap: 0 20px;
+      align-items: center;
+      margin-bottom: 24px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px;
+      padding: 18px 20px;
     }
 
-    .result-card {
-      background: rgba(255,255,255,0.055);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 18px;
-      padding: 22px 22px 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-
-    .result-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
-    }
-
-    .result-card.full { grid-column: 1 / -1; }
-
-    .card-label {
+    .score-section > p {
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: rgba(165,180,252,0.65);
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      grid-column: 1;
+      grid-row: 1;
     }
 
-    .card-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: rgba(99,102,241,0.18);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-    }
-
-    /* ─── Score ─── */
-    .score-display {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      margin-bottom: 12px;
-    }
-
-    .score-number {
-      font-size: 44px;
+    #scoreText {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: right;
+      font-size: 40px;
       font-weight: 800;
       letter-spacing: -0.04em;
       line-height: 1;
@@ -364,55 +356,42 @@
       background-clip: text;
     }
 
-    .score-denom {
-      font-size: 16px;
-      font-weight: 500;
-      color: rgba(226,232,240,0.4);
-      padding-bottom: 6px;
-    }
-
-    .progress-track {
+    /* ─── progress-bar ─── */
+    .progress-bar {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      margin-top: 14px;
       height: 8px;
-      width: 100%;
       background: rgba(255,255,255,0.08);
       border-radius: 999px;
       overflow: hidden;
     }
 
-    .progress-fill {
+    #progressFill {
       height: 100%;
-      border-radius: 999px;
       width: 0%;
+      border-radius: 999px;
       transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* ─── Segment badge ─── */
-    .segment-wrap {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: calc(100% - 28px);
-      gap: 10px;
-    }
-
-    .segment-badge {
+    /* ─── badge ─── */
+    .badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px 8px 12px;
-      border-radius: 10px;
-      font-size: 15px;
+      padding: 8px 18px 8px 14px;
+      border-radius: 11px;
+      font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.05em;
       border: 1px solid;
       width: fit-content;
-      position: relative;
+      margin-bottom: 20px;
     }
 
-    .segment-badge::before {
+    .badge::before {
       content: '';
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       display: inline-block;
       animation: pulse-dot 2s ease-in-out infinite;
@@ -420,14 +399,14 @@
 
     @keyframes pulse-dot {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.8); }
+      50%       { opacity: 0.55; transform: scale(0.75); }
     }
 
     .badge-hot {
       background: rgba(239,68,68,0.12);
       border-color: rgba(239,68,68,0.35);
       color: #fca5a5;
-      box-shadow: 0 0 18px rgba(239,68,68,0.18);
+      box-shadow: 0 0 20px rgba(239,68,68,0.20);
     }
     .badge-hot::before { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 
@@ -435,7 +414,7 @@
       background: rgba(245,158,11,0.12);
       border-color: rgba(245,158,11,0.35);
       color: #fcd34d;
-      box-shadow: 0 0 18px rgba(245,158,11,0.18);
+      box-shadow: 0 0 20px rgba(245,158,11,0.20);
     }
     .badge-warm::before { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
 
@@ -443,54 +422,58 @@
       background: rgba(16,185,129,0.12);
       border-color: rgba(16,185,129,0.35);
       color: #6ee7b7;
-      box-shadow: 0 0 18px rgba(16,185,129,0.18);
+      box-shadow: 0 0 20px rgba(16,185,129,0.20);
     }
     .badge-cold::before { background: #10b981; box-shadow: 0 0 8px #10b981; }
 
-    .segment-desc {
-      font-size: 12px;
-      color: rgba(226,232,240,0.45);
-      line-height: 1.5;
-    }
-
-    /* ─── Outreach / Next Action ─── */
+    /* ─── message-box ─── */
     .message-box {
       background: rgba(99,102,241,0.08);
       border: 1px solid rgba(99,102,241,0.18);
-      border-radius: 10px;
-      padding: 14px 16px;
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .message-box p {
       font-size: 13.5px;
       color: rgba(226,232,240,0.80);
-      line-height: 1.7;
+      line-height: 1.75;
       font-style: italic;
     }
 
+    /* ─── action-box ─── */
     .action-box {
       background: rgba(16,185,129,0.07);
       border: 1px solid rgba(16,185,129,0.18);
       border-left: 3px solid #10b981;
-      border-radius: 10px;
-      padding: 14px 16px;
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .action-box strong {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #34d399;
+    }
+
+    .action-box p {
       font-size: 13.5px;
       color: rgba(226,232,240,0.82);
       line-height: 1.7;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .action-arrow {
-      font-size: 18px;
-      line-height: 1.5;
-      flex-shrink: 0;
     }
 
     /* ─── Responsive ─── */
     @media (max-width: 540px) {
       .glass-card, .result-card { padding: 24px 20px; }
       .form-grid { grid-template-columns: 1fr; }
-      .result-grid { grid-template-columns: 1fr; }
-      .score-number { font-size: 36px; }
+      .score-section { grid-template-columns: 1fr; }
+      #scoreText { grid-column: 1; text-align: left; font-size: 32px; }
     }
   </style>
 </head>
@@ -553,62 +536,44 @@
     </form>
   </div>
 
-  <!-- Output Card -->
-  <div class="output-card" id="outputCard">
+  <!-- ═══════════════════════════════════════
+       Output card — hidden until analysis runs
+  ════════════════════════════════════════ -->
+  <div id="resultCard" class="result-card hidden">
+    <h3>📋 Lead Analysis</h3>
 
-    <div class="result-grid">
-
-      <!-- Score -->
-      <div class="result-card">
-        <div class="card-label"><span class="card-icon">📊</span> Lead Score</div>
-        <div class="score-display">
-          <span class="score-number" id="scoreNumber">0</span>
-          <span class="score-denom">/100</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
+    <div class="score-section">
+      <p>📊 Score</p>
+      <div class="progress-bar">
+        <div id="progressFill"></div>
       </div>
+      <span id="scoreText">—</span>
+    </div>
 
-      <!-- Segment -->
-      <div class="result-card">
-        <div class="card-label"><span class="card-icon">🎯</span> Segment</div>
-        <div class="segment-wrap">
-          <div class="segment-badge" id="segmentBadge"></div>
-          <p class="segment-desc" id="segmentDesc"></p>
-        </div>
-      </div>
+    <div id="segmentBadge" class="badge"></div>
 
-      <!-- Outreach Message -->
-      <div class="result-card full">
-        <div class="card-label"><span class="card-icon">💬</span> Outreach Message</div>
-        <div class="message-box" id="outreachMsg"></div>
-      </div>
+    <div class="message-box">
+      <p id="message"></p>
+    </div>
 
-      <!-- Next Action -->
-      <div class="result-card full">
-        <div class="card-label"><span class="card-icon">🚀</span> Recommended Next Action</div>
-        <div class="action-box">
-          <span class="action-arrow">→</span>
-          <span id="nextAction"></span>
-        </div>
-      </div>
-
+    <div class="action-box">
+      <strong>🚀 Next Action</strong>
+      <p id="action"></p>
     </div>
   </div>
 
   <script>
-    // ── Scoring Logic ────────────────────────────────────────────────
+    // ── Scoring ──────────────────────────────────────────────────────
     function analyzeLead({ name, role, company, size, notes }) {
       let score = 20;
       const r = role.toLowerCase();
       const n = (notes || '').toLowerCase();
 
-      const senior  = ['ceo','cto','coo','cfo','vp','director','head','chief','founder','president','owner'];
-      const mid     = ['manager','lead','senior','principal','architect','engineer','developer','designer'];
-      const junior  = ['intern','junior','trainee','assistant','coordinator','associate'];
+      const senior = ['ceo','cto','coo','cfo','vp','director','head','chief','founder','president','owner'];
+      const mid    = ['manager','lead','senior','principal','architect','engineer','developer','designer'];
+      const junior = ['intern','junior','trainee','assistant','coordinator','associate'];
 
-      if (senior.some(w => r.includes(w)))      score += 30;
+      if      (senior.some(w => r.includes(w))) score += 30;
       else if (mid.some(w => r.includes(w)))    score += 15;
       else if (junior.some(w => r.includes(w))) score -= 5;
 
@@ -617,14 +582,14 @@
       else if (size === 'smb')         score += 8;
       else if (size === 'startup')     score += 3;
 
-      const highSignals = ['urgent','asap','immediately','budget approved','decision maker',
-                           'evaluating','contract','pilot','demo','ready','purchase','buy','decision'];
-      const medSignals  = ['exploring','looking','considering','planning','researching','potential','interested'];
-      const lowSignals  = ['not now','later','no budget','pause','hold','just curious','curious'];
+      const high = ['urgent','asap','immediately','budget approved','decision maker',
+                    'evaluating','contract','pilot','demo','ready','purchase','buy','decision'];
+      const med  = ['exploring','looking','considering','planning','researching','potential','interested'];
+      const low  = ['not now','later','no budget','pause','hold','just curious','curious'];
 
-      highSignals.forEach(w => { if (n.includes(w)) score += 10; });
-      medSignals.forEach(w  => { if (n.includes(w)) score += 4;  });
-      lowSignals.forEach(w  => { if (n.includes(w)) score -= 12; });
+      high.forEach(w => { if (n.includes(w)) score += 10; });
+      med.forEach(w  => { if (n.includes(w)) score += 4; });
+      low.forEach(w  => { if (n.includes(w)) score -= 12; });
 
       score = Math.min(100, Math.max(5, Math.round(score)));
 
@@ -663,59 +628,45 @@
 
       const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
-      return {
-        score,
-        segment,
-        outreach: pick(msgs[segment]),
-        action:   pick(actions[segment]),
-      };
+      return { score, segment, outreach: pick(msgs[segment]), action: pick(actions[segment]) };
     }
 
-    // ── Progress bar color ───────────────────────────────────────────
-    function progressGradient(segment) {
-      if (segment === 'HOT')  return 'linear-gradient(90deg, #ef4444, #f97316)';
-      if (segment === 'WARM') return 'linear-gradient(90deg, #f59e0b, #fbbf24)';
+    // ── Helpers ──────────────────────────────────────────────────────
+    function progressGradient(seg) {
+      if (seg === 'HOT')  return 'linear-gradient(90deg, #ef4444, #f97316)';
+      if (seg === 'WARM') return 'linear-gradient(90deg, #f59e0b, #fbbf24)';
       return 'linear-gradient(90deg, #10b981, #34d399)';
     }
 
-    // ── Segment config ───────────────────────────────────────────────
     const segConfig = {
       HOT:  { cls: 'badge-hot',  label: '🔥 HOT',  desc: 'High priority — engage now before they go cold.' },
       WARM: { cls: 'badge-warm', label: '🌤 WARM', desc: 'Strong potential — nurture and follow up soon.' },
       COLD: { cls: 'badge-cold', label: '❄️ COLD', desc: 'Long-term pipeline — keep warm over time.' },
     };
 
-    // ── Animated score counter ───────────────────────────────────────
-    function animateCounter(el, target, duration = 900) {
+    function animateCounter(el, target, duration = 950) {
       const start = performance.now();
-      const step = ts => {
-        const p = Math.min((ts - start) / duration, 1);
+      (function step(ts) {
+        const p    = Math.min((ts - start) / duration, 1);
         const ease = 1 - Math.pow(1 - p, 3);
         el.textContent = Math.round(ease * target);
         if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
+      })(performance.now());
     }
 
-    // ── Form validation ──────────────────────────────────────────────
+    // ── Validation ───────────────────────────────────────────────────
     function validate() {
       let ok = true;
-      const checks = [
-        ['grp-name', 'inp-name'],
-        ['grp-role', 'inp-role'],
-        ['grp-company', 'inp-company'],
-        ['grp-size', 'inp-size'],
-      ];
-      checks.forEach(([gId, iId]) => {
-        const grp = document.getElementById(gId);
-        const val = document.getElementById(iId).value.trim();
-        if (!val) { grp.classList.add('has-error'); ok = false; }
-        else       { grp.classList.remove('has-error'); }
-      });
+      [['grp-name','inp-name'],['grp-role','inp-role'],['grp-company','inp-company'],['grp-size','inp-size']]
+        .forEach(([gId, iId]) => {
+          const grp = document.getElementById(gId);
+          grp.classList.toggle('has-error', !document.getElementById(iId).value.trim());
+          if (!document.getElementById(iId).value.trim()) ok = false;
+        });
       return ok;
     }
 
-    // ── Form submit ──────────────────────────────────────────────────
+    // ── Submit ───────────────────────────────────────────────────────
     document.getElementById('leadForm').addEventListener('submit', e => {
       e.preventDefault();
       if (!validate()) return;
@@ -724,7 +675,7 @@
       const spinner = document.getElementById('spinner');
       const btnText = document.getElementById('btn-text');
 
-      btn.disabled       = true;
+      btn.disabled          = true;
       spinner.style.display = 'block';
       btnText.textContent   = 'Analyzing…';
 
@@ -738,37 +689,35 @@
 
       setTimeout(() => {
         const result = analyzeLead(data);
+        const seg    = segConfig[result.segment];
 
-        // Score
-        const scoreEl    = document.getElementById('scoreNumber');
-        const progressEl = document.getElementById('progressFill');
-        animateCounter(scoreEl, result.score, 1000);
-        progressEl.style.background = progressGradient(result.segment);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            progressEl.style.width = result.score + '%';
-          });
-        });
+        // ── Populate #scoreText + #progressFill
+        const scoreEl = document.getElementById('scoreText');
+        animateCounter(scoreEl, result.score);
 
-        // Segment
-        const seg     = segConfig[result.segment];
-        const badgeEl = document.getElementById('segmentBadge');
-        badgeEl.className = 'segment-badge ' + seg.cls;
-        badgeEl.textContent = seg.label;
-        document.getElementById('segmentDesc').textContent = seg.desc;
+        const fill = document.getElementById('progressFill');
+        fill.style.background = progressGradient(result.segment);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          fill.style.width = result.score + '%';
+        }));
 
-        // Outreach
-        document.getElementById('outreachMsg').textContent = '"' + result.outreach + '"';
+        // ── Populate #segmentBadge
+        const badge  = document.getElementById('segmentBadge');
+        badge.className    = 'badge ' + seg.cls;
+        badge.textContent  = seg.label;
 
-        // Next action
-        document.getElementById('nextAction').textContent = result.action;
+        // ── Populate #message
+        document.getElementById('message').textContent = '"' + result.outreach + '"';
 
-        // Show output
-        const card = document.getElementById('outputCard');
-        card.classList.add('visible');
+        // ── Populate #action
+        document.getElementById('action').textContent = result.action;
+
+        // ── Reveal #resultCard (remove .hidden)
+        const card = document.getElementById('resultCard');
+        card.classList.remove('hidden');
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Reset button
+        // ── Reset button
         btn.disabled          = false;
         spinner.style.display = 'none';
         btnText.textContent   = '⚡ Analyze Lead';
@@ -777,10 +726,9 @@
 
     // Clear errors on input
     ['inp-name','inp-role','inp-company','inp-size'].forEach(id => {
-      const el  = document.getElementById(id);
-      const grp = el.closest('.form-group');
-      el.addEventListener('input', () => grp.classList.remove('has-error'));
-      el.addEventListener('change', () => grp.classList.remove('has-error'));
+      const el = document.getElementById(id);
+      el.addEventListener('input',  () => el.closest('.form-group').classList.remove('has-error'));
+      el.addEventListener('change', () => el.closest('.form-group').classList.remove('has-error'));
     });
   </script>
 </body>
