@@ -1,7 +1,7 @@
 let allLeads = [];
 
 async function loadLeads() {
-  const res = await fetch("/leads");
+  const res = await fetch("/api/leads");
   const data = await res.json();
   allLeads = data;
   displayLeads(data);

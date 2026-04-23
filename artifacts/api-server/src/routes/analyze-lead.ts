@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { db } from "../lib/db";
 
 const router = Router();
 
@@ -76,12 +77,17 @@ router.post("/analyze-lead", (req, res) => {
     ],
   };
 
-  res.json({
-    score,
-    segment,
-    message: pick(messages[segment]),
-    action:  pick(actions[segment]),
-  });
+  const message = pick(messages[segment]);
+  const action  = pick(actions[segment]);
+
+  db.run(
+    `INSERT INTO leads (name, role, company, company_size, notes, score, segment, message, action)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [name, role, company, companySize, notes ?? "", score, segment, message, action],
+    (err) => { if (err) console.error("Failed to save lead:", err.message); }
+  );
+
+  res.json({ score, segment, message, action });
 });
 
 export default router;
