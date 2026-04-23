@@ -30,6 +30,10 @@ body {
   color: white;
 }
 
+.filters button:hover {
+  background: rgba(139, 92, 246, 0.4);
+}
+
 .lead-card {
   padding: 15px;
   margin-bottom: 15px;
