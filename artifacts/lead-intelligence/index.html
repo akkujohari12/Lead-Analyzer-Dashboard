@@ -641,6 +641,16 @@
       return ok;
     }
 
+    // ── Animate score counter ─────────────────────────────────────────
+    function animateScore(finalScore) {
+      let current = 0;
+      const interval = setInterval(() => {
+        current++;
+        document.getElementById("scoreText").innerText = current + "/100";
+        if (current >= finalScore) clearInterval(interval);
+      }, 15);
+    }
+
     // ── script.js ────────────────────────────────────────────────────
     const button = document.querySelector("button");
 
@@ -673,7 +683,7 @@
 
       // Score animation
       document.getElementById("progressFill").style.width = result.score + "%";
-      document.getElementById("scoreText").innerText = result.score + "/100";
+      animateScore(result.score);
 
       // Segment badge
       const badge = document.getElementById("segmentBadge");
