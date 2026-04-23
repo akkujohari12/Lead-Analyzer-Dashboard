@@ -27,7 +27,7 @@ function displayLeads(leads) {
       <p><b>Segment:</b> <span class="badge ${lead.segment.toLowerCase()}">${lead.segment}</span></p>
       <p><b>Action:</b> ${lead.action}</p>
       <p style="opacity:0.6; font-size:12px;">
-        Added: ${new Date(lead.created_at).toLocaleString()}
+        Added: ${new Date(lead.created_at).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}
       </p>
     </div>
   `).join("");
