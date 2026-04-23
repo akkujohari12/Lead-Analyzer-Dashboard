@@ -26,6 +26,9 @@ function displayLeads(leads) {
       <p><b>Company:</b> ${lead.company}</p>
       <p><b>Segment:</b> <span class="badge ${lead.segment.toLowerCase()}">${lead.segment}</span></p>
       <p><b>Action:</b> ${lead.action}</p>
+      <p style="opacity:0.6; font-size:12px;">
+        Added: ${new Date(lead.created_at).toLocaleString()}
+      </p>
     </div>
   `).join("");
 }
