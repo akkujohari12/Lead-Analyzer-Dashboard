@@ -1,11 +1,107 @@
 let allLeads = [];
+let segmentChartInstance = null;
+let scoreChartInstance   = null;
 
 async function loadLeads() {
   const res = await fetch("/api/leads");
   const data = await res.json();
   allLeads = data;
   renderStats(data);
+  renderCharts(data);
   displayLeads(data);
+}
+
+function renderCharts(leads) {
+  const hot  = leads.filter(l => l.segment === "HOT").length;
+  const warm = leads.filter(l => l.segment === "WARM").length;
+  const cold = leads.filter(l => l.segment === "COLD").length;
+
+  const avgScore = seg => {
+    const group = leads.filter(l => l.segment === seg);
+    if (!group.length) return 0;
+    return Math.round(group.reduce((s, l) => s + l.score, 0) / group.length);
+  };
+
+  const chartDefaults = {
+    color: "rgba(226,232,240,0.7)",
+    font: { family: "sans-serif" }
+  };
+  Chart.defaults.color = chartDefaults.color;
+  Chart.defaults.font.family = chartDefaults.font.family;
+
+  /* ── Donut: segment distribution ── */
+  if (segmentChartInstance) segmentChartInstance.destroy();
+  segmentChartInstance = new Chart(document.getElementById("segmentChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["HOT", "WARM", "COLD"],
+      datasets: [{
+        data: [hot, warm, cold],
+        backgroundColor: [
+          "rgba(239,68,68,0.75)",
+          "rgba(245,158,11,0.75)",
+          "rgba(16,185,129,0.75)"
+        ],
+        borderColor: [
+          "rgba(239,68,68,0.2)",
+          "rgba(245,158,11,0.2)",
+          "rgba(16,185,129,0.2)"
+        ],
+        borderWidth: 1,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      cutout: "68%",
+      plugins: {
+        legend: { position: "bottom", labels: { padding: 16, boxWidth: 12, font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } }
+      }
+    }
+  });
+
+  /* ── Bar: avg score by segment ── */
+  if (scoreChartInstance) scoreChartInstance.destroy();
+  scoreChartInstance = new Chart(document.getElementById("scoreChart"), {
+    type: "bar",
+    data: {
+      labels: ["HOT", "WARM", "COLD"],
+      datasets: [{
+        label: "Avg Score",
+        data: [avgScore("HOT"), avgScore("WARM"), avgScore("COLD")],
+        backgroundColor: [
+          "rgba(239,68,68,0.55)",
+          "rgba(245,158,11,0.55)",
+          "rgba(16,185,129,0.55)"
+        ],
+        borderColor: [
+          "rgba(239,68,68,0.9)",
+          "rgba(245,158,11,0.9)",
+          "rgba(16,185,129,0.9)"
+        ],
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          min: 0, max: 100,
+          grid: { color: "rgba(255,255,255,0.06)" },
+          ticks: { stepSize: 25, font: { size: 11 } }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 11 } }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ` Avg score: ${ctx.parsed.y}/100` } }
+      }
+    }
+  });
 }
 
 function renderStats(leads) {
