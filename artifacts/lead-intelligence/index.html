@@ -376,8 +376,13 @@
       height: 100%;
       width: 0%;
       border-radius: 999px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
       transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    #progressFill.hot  { background: linear-gradient(90deg, #ef4444, #f87171); }
+    #progressFill.warm { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    #progressFill.cold { background: linear-gradient(90deg, #10b981, #34d399); }
 
     /* ─── badge ─── */
     .badge {
@@ -643,7 +648,9 @@
       document.getElementById("resultCard").classList.remove("hidden");
 
       // Score animation
-      document.getElementById("progressFill").style.width = result.score + "%";
+      const fill = document.getElementById("progressFill");
+      fill.className = result.segment.toLowerCase();
+      fill.style.width = result.score + "%";
       animateScore(result.score);
 
       // Segment badge
