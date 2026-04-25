@@ -481,73 +481,20 @@
       #scoreText { grid-column: 1; text-align: left; font-size: 32px; }
     }
 
-    /* ── style.css additions ───────────────────────────────────────── */
-    .result-card {
-      margin-top: 20px;
-      padding: 20px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      animation: fadeIn 0.5s ease;
+    /* ─── Admin link ─── */
+    .admin-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      font-size: 12px;
+      font-weight: 500;
+      color: rgba(165,180,252,0.55);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
     }
-
-    .hidden {
-      display: none;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    #progressFill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #6a5af9, #8b5cf6);
-      transition: width 0.6s ease;
-    }
-
-    .badge {
-      margin-top: 10px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      display: inline-block;
-      font-weight: bold;
-    }
-
-    .badge.hot {
-      background: rgba(255, 0, 0, 0.15);
-      color: #ff4d4d;
-      box-shadow: 0 0 12px rgba(255, 0, 0, 0.4);
-    }
-
-    .badge.warm {
-      background: rgba(255, 165, 0, 0.15);
-      color: orange;
-      box-shadow: 0 0 12px rgba(255, 165, 0, 0.4);
-    }
-
-    .badge.cold {
-      background: rgba(0, 255, 150, 0.15);
-      color: #00ffa6;
-      box-shadow: 0 0 12px rgba(0, 255, 150, 0.4);
-    }
-
-    .message-box, .action-box {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .admin-link:hover { color: #a5b4fc; }
   </style>
 </head>
 <body>
@@ -557,7 +504,7 @@
     <div class="header-badge">⚡ AI-Powered</div>
     <h1>Lead Intelligence Tool</h1>
     <p>Score prospects, identify segments, and craft perfect outreach — instantly.</p>
-    <p style="opacity:0.7;">AI-powered lead scoring & outreach automation</p>
+    <a class="admin-link" href="/admin.html">⚙ Admin Dashboard →</a>
   </div>
 
   <!-- Input Form Card -->
@@ -662,11 +609,14 @@
     }
 
     // ── script.js ────────────────────────────────────────────────────
-    const button = document.querySelector("button");
+    const button  = document.getElementById("btn-submit");
+    const spinner = document.getElementById("spinner");
+    const btnText = document.getElementById("btn-text");
 
     async function submitLead() {
-      button.innerText = "Analyzing...";
       button.disabled = true;
+      spinner.style.display = "block";
+      btnText.textContent = "Analyzing…";
 
       const data = {
         name:        document.getElementById("name").value,
@@ -685,8 +635,9 @@
       const result = await res.json();
 
       // Restore button
-      button.innerText = "⚡ Analyze Lead";
       button.disabled = false;
+      spinner.style.display = "none";
+      btnText.textContent = "⚡ Analyze Lead";
 
       // Show card
       document.getElementById("resultCard").classList.remove("hidden");
@@ -726,7 +677,8 @@
         document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (err) {
         console.error('Analysis failed:', err);
-        button.innerText = '⚠ Error — try again';
+        spinner.style.display = 'none';
+        btnText.textContent = '⚠ Error — try again';
         button.disabled = false;
       }
     });
